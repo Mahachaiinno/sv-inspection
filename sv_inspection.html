@@ -704,12 +704,20 @@ function renderDash(){
 function drawSVChart(ar){
   const canvas=document.getElementById('sv-chart');
   if(!canvas)return;
+  // Delay to ensure page is visible and has layout
+  requestAnimationFrame(()=>{
+    _drawChart(canvas,ar);
+  });
+}
+
+function _drawChart(canvas,ar){
   const ctx=canvas.getContext('2d');
   const pts=ar.map((r,i)=>({i,sv:parseFloat(r.sv),smin:parseFloat(r.specMin),smax:parseFloat(r.specMax),result:r.result,label:(r.main||'')+(r.sub?' '+r.sub:''),date:r.date||''})).filter(p=>!isNaN(p.sv));
 
-  // sizing
+  // sizing — use offsetParent width, fallback to window width
   const dpr=window.devicePixelRatio||1;
-  const W=canvas.parentElement.clientWidth-32||600;
+  const parent=canvas.parentElement;
+  const W=Math.max(parent.offsetWidth||parent.clientWidth||window.innerWidth-64,300);
   const H=260;
   canvas.width=W*dpr;canvas.height=H*dpr;
   canvas.style.width=W+'px';canvas.style.height=H+'px';
@@ -816,33 +824,38 @@ function drawSVChart(ar){
   // Tooltip on hover
   canvas._pts=pts;canvas._xOf=xOf;canvas._yOf=yOf;
   canvas._cH=cH;canvas._PAD=PAD;canvas._vmin=vmin;canvas._vmax=vmax;
-}
+} // end _drawChart
 
-// Hover tooltip
+// Hover tooltip — attach once
 (function(){
-  document.addEventListener('DOMContentLoaded',()=>{
+  let tipEl=null;
+  function getTip(){
+    if(!tipEl){
+      tipEl=document.createElement('div');
+      tipEl.style.cssText='position:fixed;background:#1A2233;color:#fff;padding:6px 10px;border-radius:7px;font-size:11px;line-height:1.6;pointer-events:none;display:none;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.2)';
+      document.body.appendChild(tipEl);
+    }
+    return tipEl;
+  }
+  document.addEventListener('mousemove',e=>{
     const canvas=document.getElementById('sv-chart');
-    if(!canvas)return;
-    const tip=document.createElement('div');
-    tip.style.cssText='position:fixed;background:#1A2233;color:#fff;padding:6px 10px;border-radius:7px;font-size:11px;line-height:1.6;pointer-events:none;display:none;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.2)';
-    document.body.appendChild(tip);
-    canvas.addEventListener('mousemove',e=>{
-      const pts=canvas._pts;if(!pts||!pts.length){tip.style.display='none';return;}
-      const rect=canvas.getBoundingClientRect();
-      const mx=e.clientX-rect.left;
-      const xOf=canvas._xOf;
-      let best=0,bd=Infinity;
-      pts.forEach((p,i)=>{const d=Math.abs(xOf(i)-mx);if(d<bd){bd=d;best=i;}});
-      if(bd>24){tip.style.display='none';return;}
-      const p=pts[best];
-      const c=p.result==='Pass'?'#4ade80':p.result==='Fail'?'#f87171':'#fbbf24';
-      tip.innerHTML=`<b style="color:${c}">${p.result||'—'}</b> | SV: <b>${p.sv}</b><br>
-        ${p.label} | ${p.date||''}`;
-      tip.style.display='block';
-      tip.style.left=(e.clientX+14)+'px';
-      tip.style.top=(e.clientY-10)+'px';
-    });
-    canvas.addEventListener('mouseleave',()=>tip.style.display='none');
+    if(!canvas){return;}
+    const tip=getTip();
+    const pts=canvas._pts;
+    if(!pts||!pts.length){tip.style.display='none';return;}
+    const rect=canvas.getBoundingClientRect();
+    const mx=e.clientX-rect.left;
+    if(mx<0||mx>rect.width){tip.style.display='none';return;}
+    const xOf=canvas._xOf;
+    let best=0,bd=Infinity;
+    pts.forEach((p,i)=>{const d=Math.abs(xOf(i)-mx);if(d<bd){bd=d;best=i;}});
+    if(bd>28){tip.style.display='none';return;}
+    const p=pts[best];
+    const c=p.result==='Pass'?'#4ade80':p.result==='Fail'?'#f87171':'#fbbf24';
+    tip.innerHTML=`<b style="color:${c}">${p.result||'—'}</b> | SV: <b>${p.sv}</b><br>${p.label} | ${p.date||''}`;
+    tip.style.display='block';
+    tip.style.left=(e.clientX+14)+'px';
+    tip.style.top=(e.clientY-10)+'px';
   });
 })();
 
