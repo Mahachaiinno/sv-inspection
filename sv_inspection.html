@@ -736,6 +736,36 @@ async function pushSpec(){
   catch(e){toast('บันทึก SPEC ล้มเหลว: '+e.message,'err');}
 }
 
+// SPEC ST
+function renderSpecSTPage(){
+  const tbody=document.getElementById('specst-tbody');
+  if(!tbody)return;
+  tbody.innerHTML=specST.length?specST.map((s,i)=>`
+    <tr>
+      <td style="font-weight:600">${s.die}</td>
+      <td style="text-align:center"><input class="sinput" type="number" value="${s.max}" step="0.1" onchange="specST[${i}].max=parseFloat(this.value)||0;saveLocal()"></td>
+      <td style="text-align:center"><button class="btn sm danger" onclick="specST.splice(${i},1);saveLocal();renderSpecSTPage()"><i class="ti ti-trash"></i></button></td>
+    </tr>`).join('')
+    :'<tr><td colspan="3" style="text-align:center;padding:16px;color:var(--text-ter)">ยังไม่มีข้อมูล — กดเพิ่ม Die Size</td></tr>';
+}
+function addSpecST(){
+  const die=fget('new-st-die');
+  if(!die){toast('กรุณาเลือก Die Size','err');return;}
+  const max=parseFloat(document.getElementById('new-st-max').value)||0;
+  const idx=specST.findIndex(s=>s.die===die);
+  if(idx>=0)specST[idx]={die,max};
+  else specST.push({die,max});
+  saveLocal();renderSpecSTPage();
+  document.getElementById('new-st-die').value='';
+  document.getElementById('new-st-max').value='';
+  toast('เพิ่ม SPEC ST แล้ว','ok');
+}
+async function pushSpecST(){
+  saveLocal();
+  try{await gsCall({action:'saveSpecST',specST});toast('บันทึก SPEC ST → Google Sheet สำเร็จ','ok');}
+  catch(e){toast('บันทึก SPEC ST ล้มเหลว: '+e.message,'err');}
+}
+
 // Init
 (function(){
   const n=nowDT();
