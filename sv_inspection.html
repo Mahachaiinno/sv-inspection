@@ -161,7 +161,6 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);fon
     </button>
     <button class="tab-btn active" onclick="showPage('form',this)"><i class="ti ti-plus"></i> บันทึก</button>
     <button class="tab-btn" onclick="showPage('records',this)"><i class="ti ti-list"></i> รายการ</button>
-    <button class="tab-btn" onclick="showPage('dash',this)"><i class="ti ti-chart-bar"></i> Dashboard</button>
     <button class="tab-btn" onclick="showPage('spec',this)"><i class="ti ti-ruler"></i> SPEC</button>
   </div>
 </div>
@@ -172,7 +171,6 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);fon
     <div class="section-hdr"><i class="ti ti-info-circle"></i> ข้อมูลทั่วไป</div>
     <div class="form-grid">
       <div class="field"><label>วันที่ *</label><input type="date" id="f-date"></div>
-      <div class="field"><label>เวลา *</label><input type="time" id="f-time"></div>
       <div class="field">
         <label>Inspector *</label>
         <select id="f-inspector">
@@ -183,9 +181,15 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);fon
       </div>
       <div class="field">
         <label>Shift *</label>
-        <select id="f-shift">
+        <select id="f-shift" onchange="onShiftChange()">
           <option value="">-- เลือก Shift --</option>
           <option>P1</option><option>P2</option><option>P3</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>เวลา (Sampling Time) *</label>
+        <select id="f-time">
+          <option value="">-- เลือก Shift ก่อน --</option>
         </select>
       </div>
       <div class="field">
@@ -207,9 +211,6 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);fon
           </button>
           <button class="check-opt" id="chk-rc" onclick="selCheck('Recheck')" type="button">
             <i class="ti ti-refresh-alert" style="font-size:22px;color:var(--purple)"></i>Recheck
-          </button>
-          <button class="check-opt sel-none" id="chk-none" onclick="selCheck('')" type="button" style="max-width:110px">
-            <i class="ti ti-minus" style="font-size:22px;color:var(--text-ter)"></i>ไม่ระบุ
           </button>
         </div>
       </div>
@@ -275,91 +276,6 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);fon
   </div>
 </div>
 
-<!-- ═══ PAGE: DASHBOARD ═══ -->
-<div id="page-dash" class="page">
-
-  <!-- Filter Bar -->
-  <div class="card" style="margin-bottom:14px">
-    <div class="section-hdr"><i class="ti ti-filter"></i> กรองข้อมูล</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;align-items:end">
-      <div class="field">
-        <label>วันที่เริ่มต้น</label>
-        <input type="date" id="df-from" onchange="renderDash()">
-      </div>
-      <div class="field">
-        <label>วันที่สิ้นสุด</label>
-        <input type="date" id="df-to" onchange="renderDash()">
-      </div>
-      <div class="field">
-        <label>Main Formula</label>
-        <select id="df-main" onchange="renderDash()">
-          <option value="">ทั้งหมด</option>
-          <option>701</option><option>901</option><option>POLY</option>
-          <option>MS3618</option><option>MS9123</option><option>TNT</option>
-          <option>BROODS</option><option>NF</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Sub Formula</label>
-        <select id="df-sub" onchange="renderDash()">
-          <option value="">ทั้งหมด</option>
-          <option>P</option><option>S</option><option>G</option><option>NK</option><option>MY</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Shift</label>
-        <select id="df-shift" onchange="renderDash()">
-          <option value="">ทั้งหมด</option>
-          <option>P1</option><option>P2</option><option>P3</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>LINE</label>
-        <select id="df-line" onchange="renderDash()">
-          <option value="">ทั้งหมด</option>
-          <option>L1</option><option>L2</option><option>L3</option><option>L4</option>
-          <option>L5</option><option>L6</option><option>L7</option><option>L8</option>
-        </select>
-      </div>
-      <div class="field" style="justify-content:flex-end">
-        <label style="opacity:0">x</label>
-        <button class="btn" onclick="clearDashFilter()" style="border-color:var(--border)">
-          <i class="ti ti-x"></i> ล้างตัวกรอง
-        </button>
-      </div>
-    </div>
-    <div style="margin-top:8px;font-size:11px;color:var(--text-sec)">
-      แสดงข้อมูล: <strong id="df-count-label">ทั้งหมด</strong>
-    </div>
-  </div>
-
-  <!-- KPI -->
-  <div class="kpi-grid">
-    <div class="kpi"><div class="kpi-label">Total แถว</div><div class="kpi-val blue" id="d-total">0</div></div>
-    <div class="kpi"><div class="kpi-label">Pass</div><div class="kpi-val pass" id="d-pass">0</div></div>
-    <div class="kpi"><div class="kpi-label">Fail</div><div class="kpi-val fail" id="d-fail">0</div></div>
-    <div class="kpi"><div class="kpi-label">Hold</div><div class="kpi-val hold" id="d-hold">0</div></div>
-    <div class="kpi"><div class="kpi-label">Pass Rate</div><div class="kpi-val pct" id="d-pct">0%</div></div>
-    <div class="kpi"><div class="kpi-label">Avg SV</div><div class="kpi-val blue" id="d-avg">—</div></div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-bottom:12px">
-    <div class="card"><div class="section-hdr"><i class="ti ti-clock"></i> Shift</div><div id="d-shift"></div></div>
-    <div class="card"><div class="section-hdr"><i class="ti ti-user"></i> Inspector</div><div id="d-insp"></div></div>
-    <div class="card"><div class="section-hdr"><i class="ti ti-test-pipe"></i> Sampling</div><div id="d-samp"></div></div>
-  </div>
-  <div class="card">
-    <div class="section-hdr"><i class="ti ti-chart-line"></i> กราฟ SV Trend พร้อมเส้นแนวโน้ม (Trendline)</div>
-    <canvas id="sv-chart" style="width:100%;height:260px;display:block"></canvas>
-    <div style="display:flex;gap:18px;margin-top:10px;font-size:11px;color:var(--text-sec);font-weight:600;flex-wrap:wrap">
-      <span><span style="display:inline-block;width:24px;height:3px;background:var(--blue);border-radius:2px;margin-right:5px;vertical-align:middle"></span>SV</span>
-      <span><span style="display:inline-block;width:24px;height:2px;background:var(--orange);border-radius:2px;margin-right:5px;vertical-align:middle;border-top:2px dashed var(--orange)"></span>Trendline</span>
-      <span><span style="display:inline-block;width:24px;height:2px;background:var(--green);border-radius:2px;margin-right:5px;vertical-align:middle"></span>SPEC Min</span>
-      <span><span style="display:inline-block;width:24px;height:2px;background:var(--orange);border-radius:2px;margin-right:5px;vertical-align:middle"></span>SPEC Max</span>
-    </div>
-  </div>
-</div>
-
 <!-- ═══ PAGE: SPEC ═══ -->
 <div id="page-spec" class="page">
   <div class="card">
@@ -399,12 +315,22 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);fon
 
 <script>
 const GS_URL='https://script.google.com/macros/s/AKfycbyp5RxqIfpq6lZ6D5xp2SoWk9RNBcxzW-Vu7TKjKGT9bNiW1pitF8CPMnzLcWae3-2nXA/exec';
-const MAIN_FORMULAS=['701','901','POLY','MS3618','MS9123','TNT','BROODS','NF'];
-const SUB_MAP={'701':['P'],'901':['S'],'POLY':['G'],'MS3618':['NK'],'MS9123':['B1'],'TNT':['B2'],'BROODS':['B3'],'NF':[]};
+const MAIN_FORMULAS=['701','901','POLY','97LC','MS9123','MS3618','BROODS','TNT','Others'];
+const SUB_MAP={'701':['P'],'901':['S'],'POLY':['G'],'MS3618':['NK'],'MS9123':['B1'],'TNT':['B2'],'BROODS':['B3'],'97LC':[],'Others':[]};
 const INSPECTORS=['Inspector 1','Inspector 2','Inspector 3','Inspector 4','Inspector 5','Inspector 6','Inspector 7'];
-const SAMP_LIST=[{n:1,l:'Mix1'},{n:2,l:'Mix2'},{n:3,l:'หลังบด'},{n:4,l:'Feeder'},{n:5,l:'Hot Mass'},{n:6,l:'Hot Pallet'},{n:7,l:'HB'},{n:8,l:'Dryer'},{n:9,l:'Cooler'},{n:10,l:'After Sieve'},{n:11,l:'Packing'}];
-const LINES=['L1','L2','L3','L4','L5','L6','L7','L8'];
-const DEFAULT_SPECS=[{main:'701',sub:'P',min:70,max:110},{main:'901',sub:'S',min:70,max:110},{main:'POLY',sub:'G',min:80,max:120},{main:'MS3618',sub:'NK',min:0,max:0},{main:'MS9123',sub:'B1',min:0,max:0},{main:'TNT',sub:'B2',min:0,max:0},{main:'BROODS',sub:'B3',min:0,max:0},{main:'NF',sub:'',min:0,max:0}];
+const SAMP_LIST=[
+  {n:1,l:'Mix1'},{n:2,l:'Mix2'},{n:3,l:'หลังบด'},{n:4,l:'Feeder'},
+  {n:5,l:'ก่อนลง DIE'},{n:6,l:'หลัง DIE'},{n:7,l:'HB'},
+  {n:8,l:'Dryer'},{n:9,l:'Cooler'},{n:10,l:'After Sieve'},
+  {n:11,l:'Packing'},{n:12,l:'Before Sieve'}
+];
+const LINES=['L1','L2','L3','L4','L5','L6','L7','L8','C1','C2','C3','C4'];
+const SHIFT_TIMES={
+  'P1':['08:00','10:00','12:00','14:00'],
+  'P2':['16:00','18:00','20:00','22:00'],
+  'P3':['00:00','02:00','04:00','06:00'],
+};
+const DEFAULT_SPECS=[{main:'701',sub:'P',min:70,max:110},{main:'901',sub:'S',min:70,max:110},{main:'POLY',sub:'G',min:80,max:120},{main:'MS3618',sub:'NK',min:0,max:0},{main:'MS9123',sub:'B1',min:0,max:0},{main:'TNT',sub:'B2',min:0,max:0},{main:'BROODS',sub:'B3',min:0,max:0},{main:'97LC',sub:'',min:0,max:0},{main:'Others',sub:'',min:0,max:0}];
 
 let records=[],specs=[],selCheckVal='',selSampVal='',rowId=0;
 try{const s=localStorage.getItem('sv_r');if(s)records=JSON.parse(s);}catch(e){}
@@ -449,7 +375,7 @@ async function syncAll(){
     records=Object.values(map).sort((a,b)=>Number(b.id)-Number(a.id));
     saveLocal();setConn('ok','Google Sheet พร้อมใช้งาน');
     toast('Sync สำเร็จ — '+records.length+' Batch','ok');
-    renderTable();renderDash();
+    renderTable();
   }catch(e){setConn('err','Sync ล้มเหลว');toast('Sync ล้มเหลว: '+e.message,'err');}
   btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Sync';
 }
@@ -487,13 +413,23 @@ document.addEventListener('click',e=>{if(!document.getElementById('samp-dd').con
 // Check
 function selCheck(v){
   selCheckVal=v;
-  const ck=document.getElementById('chk-ck'),rc=document.getElementById('chk-rc'),nn=document.getElementById('chk-none');
-  ck.className='check-opt';rc.className='check-opt';nn.className='check-opt sel-none';
+  const ck=document.getElementById('chk-ck'),rc=document.getElementById('chk-rc');
+  ck.className='check-opt';rc.className='check-opt';
   if(v==='ตรวจสอบ')ck.className='check-opt sel-ck';
   else if(v==='Recheck')rc.className='check-opt sel-rc';
 }
 
-// Nav
+// Shift → update Sampling Time options
+function onShiftChange(){
+  const shift=fget('f-shift');
+  const sel=document.getElementById('f-time');
+  const times=SHIFT_TIMES[shift]||[];
+  if(!times.length){
+    sel.innerHTML='<option value="">-- เลือก Shift ก่อน --</option>';
+  } else {
+    sel.innerHTML='<option value="">-- เลือกเวลา --</option>'+times.map(t=>`<option value="${t}">${t} น.</option>`).join('');
+  }
+}
 function showPage(p,btn){
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
@@ -501,7 +437,6 @@ function showPage(p,btn){
   btn.classList.add('active');
   document.getElementById('samp-panel').classList.remove('open');
   if(p==='records')renderTable();
-  if(p==='dash')renderDash();
   if(p==='spec')renderSpecPage();
 }
 
@@ -516,12 +451,15 @@ function toast(msg,type='info'){
 function mOpts(){return'<option value="">—</option>'+MAIN_FORMULAS.map(f=>`<option>${f}</option>`).join('');}
 function sOpts(){return'<option value="">None</option><option>P</option><option>S</option><option>G</option><option>NK</option><option>MY</option>';}
 function lOpts(){return'<option value="">—</option>'+LINES.map(l=>`<option>${l}</option>`).join('');}
-function dOpts(){return'<option value="">—</option><option>1.0</option><option>1.2</option><option>1.4</option><option>1.7</option><option>2.0</option><option>2.3</option>';}
+function dOpts(){return'<option value="">—</option><option>1.0</option><option>1.2</option><option>1.4</option><option>1.7</option><option>2.0</option><option>2.3</option><option>CRUMBLE</option>';}
 function makeRow(id){
   return`<tr id="row-${id}">
     <td style="text-align:center"><button class="del-row-btn" onclick="delRow(${id})">✕</button></td>
     <td><select class="r-line">${lOpts()}</select></td>
-    <td><select class="r-main" onchange="onMC(${id})">${mOpts()}</select></td>
+    <td>
+      <select class="r-main" onchange="onMC(${id})">${mOpts()}</select>
+      <input class="r-main-other" type="text" placeholder="ระบุ..." style="display:none;width:100%;margin-top:3px;padding:4px 6px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:'Sarabun',sans-serif">
+    </td>
     <td><select class="r-sub" onchange="calcRes(${id})">${sOpts()}</select></td>
     <td><input class="r-feed" type="text" placeholder="Feed Code"></td>
     <td><select class="r-die">${dOpts()}</select></td>
@@ -533,7 +471,19 @@ function makeRow(id){
 }
 function addRow(){rowId++;document.getElementById('prod-tbody').insertAdjacentHTML('beforeend',makeRow(rowId));}
 function delRow(id){document.getElementById('row-'+id)?.remove();if(!document.getElementById('prod-tbody').children.length)addRow();}
-function onMC(id){updSpec(id);calcRes(id);}
+function onMC(id){
+  const row=document.getElementById('row-'+id);
+  const main=row.querySelector('.r-main').value;
+  const otherInput=row.querySelector('.r-main-other');
+  if(main==='Others'){
+    otherInput.style.display='block';
+    otherInput.focus();
+  } else {
+    otherInput.style.display='none';
+    otherInput.value='';
+  }
+  updSpec(id);calcRes(id);
+}
 function updSpec(id){
   const row=document.getElementById('row-'+id);
   const sp=getSpec(row.querySelector('.r-main').value,row.querySelector('.r-sub').value);
@@ -550,9 +500,12 @@ function calcRes(id){
 }
 function getRows(){
   return Array.from(document.getElementById('prod-tbody').rows).map(row=>{
-    const main=row.querySelector('.r-main').value,sub=row.querySelector('.r-sub').value;
+    const mainSel=row.querySelector('.r-main').value;
+    const mainOther=row.querySelector('.r-main-other').value.trim();
+    const main=mainSel==='Others'&&mainOther?'Others: '+mainOther:mainSel;
+    const sub=row.querySelector('.r-sub').value;
     const sv=row.querySelector('.r-sv').value,svN=parseFloat(sv);
-    const sp=getSpec(main,sub);let result='';
+    const sp=getSpec(mainSel,sub);let result='';
     if(sp&&!isNaN(svN)&&(sp.min||sp.max))result=svN>=sp.min&&svN<=sp.max?'Pass':'Fail';
     return{line:row.querySelector('.r-line').value,main,sub,feedcode:row.querySelector('.r-feed').value,diesize:row.querySelector('.r-die').value,sv,specMin:sp?sp.min:'',specMax:sp?sp.max:'',result};
   }).filter(r=>r.line||r.main||r.sv);
@@ -560,8 +513,10 @@ function getRows(){
 function clearProd(){document.getElementById('prod-tbody').innerHTML='';rowId=0;addRow();}
 function clearForm(){
   ['f-inspector','f-shift'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('f-remark').value='';selCheck('');clearSamp();clearProd();
-  const n=nowDT();document.getElementById('f-date').value=n.date;document.getElementById('f-time').value=n.time;
+  document.getElementById('f-remark').value='';
+  document.getElementById('f-time').innerHTML='<option value="">-- เลือก Shift ก่อน --</option>';
+  selCheck('');clearSamp();clearProd();
+  const n=nowDT();document.getElementById('f-date').value=n.date;
 }
 async function saveRecord(){
   if(!fget('f-inspector')){toast('กรุณาเลือก Inspector','err');return;}
@@ -629,236 +584,6 @@ async function delRec(id){
   catch(e){toast('ลบ Local แล้ว (Sheet: '+e.message+')','err');}
 }
 
-// Dashboard
-function getDashFilter(){
-  return{
-    from: document.getElementById('df-from').value,
-    to:   document.getElementById('df-to').value,
-    main: document.getElementById('df-main').value,
-    sub:  document.getElementById('df-sub').value,
-    shift:document.getElementById('df-shift').value,
-    line: document.getElementById('df-line').value,
-  };
-}
-function clearDashFilter(){
-  ['df-from','df-to','df-main','df-sub','df-shift','df-line'].forEach(id=>document.getElementById(id).value='');
-  renderDash();
-}
-function filteredData(){
-  const f=getDashFilter();
-  return records.filter(rec=>{
-    if(f.shift&&rec.shift!==f.shift)return false;
-    if(f.from&&rec.date<f.from)return false;
-    if(f.to&&rec.date>f.to)return false;
-    return true;
-  }).map(rec=>({
-    ...rec,
-    rows:(rec.rows||[]).filter(row=>{
-      if(f.main&&row.main!==f.main)return false;
-      if(f.sub&&row.sub!==f.sub)return false;
-      if(f.line&&row.line!==f.line)return false;
-      return true;
-    })
-  })).filter(rec=>rec.rows.length);
-}
-function sumRows(keys,keyFn,data){
-  if(!data.length)return'<div class="empty" style="padding:12px">ไม่มีข้อมูล</div>';
-  const total=data.length;
-  return keys.map(k=>{
-    const rs=data.filter(r=>keyFn(r)===k);if(!rs.length)return'';
-    const rl=rs.flatMap(r=>r.rows||[]);
-    const pass=rl.filter(r=>r.result==='Pass').length;
-    const pPct=rl.length?Math.round(pass/rl.length*100):0;
-    const w=Math.round(rs.length/total*100);
-    return`<div class="result-row"><span style="font-size:12px;font-weight:600;min-width:75px;word-break:break-all">${k}</span><div class="bar-wrap"><div class="bar-fill" style="width:${w}%"></div></div><span style="font-size:11px;color:var(--text-sec);white-space:nowrap;min-width:68px;text-align:right">${rs.length} btc (${pPct}%P)</span></div>`;
-  }).filter(Boolean).join('');
-}
-function renderDash(){
-  const data=filteredData();
-  const ar=data.flatMap(r=>r.rows||[]);
-  const total=ar.length,pass=ar.filter(r=>r.result==='Pass').length,fail=ar.filter(r=>r.result==='Fail').length,hold=ar.filter(r=>r.result==='Hold').length;
-  document.getElementById('d-total').textContent=total;
-  document.getElementById('d-pass').textContent=pass;
-  document.getElementById('d-fail').textContent=fail;
-  document.getElementById('d-hold').textContent=hold;
-  document.getElementById('d-pct').textContent=total?((pass/total)*100).toFixed(1)+'%':'0%';
-  const svs=ar.map(r=>parseFloat(r.sv)).filter(v=>!isNaN(v)&&v>0);
-  document.getElementById('d-avg').textContent=svs.length?(svs.reduce((a,b)=>a+b,0)/svs.length).toFixed(2):'—';
-  // label
-  const f=getDashFilter();
-  const parts=[];
-  if(f.from||f.to)parts.push((f.from||'...')+' ถึง '+(f.to||'...'));
-  if(f.main)parts.push('Main: '+f.main);
-  if(f.sub)parts.push('Sub: '+f.sub);
-  if(f.shift)parts.push('Shift: '+f.shift);
-  if(f.line)parts.push('LINE: '+f.line);
-  document.getElementById('df-count-label').textContent=parts.length?parts.join(' | '):'ทั้งหมด';
-  document.getElementById('d-shift').innerHTML=sumRows(['P1','P2','P3'],r=>r.shift,data);
-  document.getElementById('d-insp').innerHTML=sumRows(INSPECTORS,r=>r.inspector,data);
-  document.getElementById('d-samp').innerHTML=sumRows(SAMP_LIST.map(s=>s.l),r=>r.sampling,data);
-  // Line chart with trendline
-  drawSVChart(ar);
-}
-
-// ── SV Line Chart with Trendline ──────────────────────────────
-function drawSVChart(ar){
-  const canvas=document.getElementById('sv-chart');
-  if(!canvas)return;
-  // Delay to ensure page is visible and has layout
-  requestAnimationFrame(()=>{
-    _drawChart(canvas,ar);
-  });
-}
-
-function _drawChart(canvas,ar){
-  const ctx=canvas.getContext('2d');
-  const pts=ar.map((r,i)=>({i,sv:parseFloat(r.sv),smin:parseFloat(r.specMin),smax:parseFloat(r.specMax),result:r.result,label:(r.main||'')+(r.sub?' '+r.sub:''),date:r.date||''})).filter(p=>!isNaN(p.sv));
-
-  // sizing — use offsetParent width, fallback to window width
-  const dpr=window.devicePixelRatio||1;
-  const parent=canvas.parentElement;
-  const W=Math.max(parent.offsetWidth||parent.clientWidth||window.innerWidth-64,300);
-  const H=260;
-  canvas.width=W*dpr;canvas.height=H*dpr;
-  canvas.style.width=W+'px';canvas.style.height=H+'px';
-  ctx.scale(dpr,dpr);
-
-  const PAD={top:20,right:20,bottom:48,left:52};
-  const cW=W-PAD.left-PAD.right;
-  const cH=H-PAD.top-PAD.bottom;
-
-  ctx.clearRect(0,0,W,H);
-
-  if(!pts.length){
-    ctx.fillStyle='#9AA3B2';ctx.font='13px Sarabun,sans-serif';ctx.textAlign='center';
-    ctx.fillText('ไม่มีข้อมูล SV',W/2,H/2);return;
-  }
-
-  // value range
-  const svVals=pts.map(p=>p.sv);
-  const smins=pts.map(p=>p.smin).filter(v=>!isNaN(v)&&v>0);
-  const smaxs=pts.map(p=>p.smax).filter(v=>!isNaN(v)&&v>0);
-  const allVals=[...svVals,...smins,...smaxs];
-  let vmin=Math.min(...allVals),vmax=Math.max(...allVals);
-  const pad=(vmax-vmin)*0.15||10;
-  vmin=Math.floor(vmin-pad);vmax=Math.ceil(vmax+pad);
-
-  const xOf=i=>PAD.left+(i/(pts.length-1||1))*cW;
-  const yOf=v=>PAD.top+cH-(((v-vmin)/(vmax-vmin))*cH);
-
-  // CSS vars
-  const st=getComputedStyle(document.documentElement);
-  const C_BLUE='#1F4E79',C_GREEN='#375623',C_ORANGE='#C55A11',C_GRID='#DDE3EC',C_TEXT='#5A6478';
-
-  // Grid lines + Y labels
-  const steps=6;
-  ctx.font='11px IBM Plex Mono,monospace';ctx.fillStyle=C_TEXT;ctx.textAlign='right';
-  for(let i=0;i<=steps;i++){
-    const v=vmin+((vmax-vmin)/steps)*i;
-    const y=yOf(v);
-    ctx.strokeStyle=C_GRID;ctx.lineWidth=1;ctx.setLineDash([3,3]);
-    ctx.beginPath();ctx.moveTo(PAD.left,y);ctx.lineTo(PAD.left+cW,y);ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillText(Math.round(v),PAD.left-6,y+4);
-  }
-
-  // SPEC Min/Max bands (from first spec found)
-  const specMin=smins.length?smins[0]:null;
-  const specMax=smaxs.length?smaxs[0]:null;
-  if(specMin!==null&&specMax!==null){
-    const yMn=yOf(specMin),yMx=yOf(specMax);
-    // band fill
-    ctx.fillStyle='rgba(55,86,35,0.07)';
-    ctx.fillRect(PAD.left,yMx,cW,yMn-yMx);
-    // SPEC Min line
-    ctx.strokeStyle=C_GREEN;ctx.lineWidth=1.5;ctx.setLineDash([6,4]);
-    ctx.beginPath();ctx.moveTo(PAD.left,yMn);ctx.lineTo(PAD.left+cW,yMn);ctx.stroke();
-    // SPEC Max line
-    ctx.strokeStyle=C_ORANGE;ctx.lineWidth=1.5;ctx.setLineDash([6,4]);
-    ctx.beginPath();ctx.moveTo(PAD.left,yMx);ctx.lineTo(PAD.left+cW,yMx);ctx.stroke();
-    ctx.setLineDash([]);
-    // labels
-    ctx.font='10px Sarabun,sans-serif';ctx.fillStyle=C_GREEN;ctx.textAlign='left';
-    ctx.fillText('Min '+specMin,PAD.left+4,yMn-4);
-    ctx.fillStyle=C_ORANGE;
-    ctx.fillText('Max '+specMax,PAD.left+4,yMx+12);
-  }
-
-  // SV line
-  ctx.strokeStyle=C_BLUE;ctx.lineWidth=2;ctx.setLineDash([]);
-  ctx.beginPath();
-  pts.forEach((p,i)=>{const x=xOf(i),y=yOf(p.sv);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
-  ctx.stroke();
-
-  // Trendline (linear regression)
-  if(pts.length>1){
-    const n=pts.length;
-    let sx=0,sy=0,sxy=0,sx2=0;
-    pts.forEach((p,i)=>{sx+=i;sy+=p.sv;sxy+=i*p.sv;sx2+=i*i;});
-    const slope=(n*sxy-sx*sy)/(n*sx2-sx*sx);
-    const intercept=(sy-slope*sx)/n;
-    const ty0=intercept,ty1=slope*(n-1)+intercept;
-    ctx.strokeStyle='rgba(193,86,17,0.85)';ctx.lineWidth=2;ctx.setLineDash([8,5]);
-    ctx.beginPath();ctx.moveTo(xOf(0),yOf(ty0));ctx.lineTo(xOf(n-1),yOf(ty1));ctx.stroke();
-    ctx.setLineDash([]);
-  }
-
-  // Dots
-  pts.forEach((p,i)=>{
-    const x=xOf(i),y=yOf(p.sv);
-    const c=p.result==='Pass'?C_GREEN:p.result==='Fail'?C_ORANGE:'#7F6000';
-    ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);
-    ctx.fillStyle=c;ctx.fill();
-    ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
-  });
-
-  // X labels (date/index) — show up to 10
-  ctx.fillStyle=C_TEXT;ctx.font='10px Sarabun,sans-serif';ctx.textAlign='center';ctx.setLineDash([]);
-  const step=Math.ceil(pts.length/10);
-  pts.forEach((p,i)=>{
-    if(i%step!==0&&i!==pts.length-1)return;
-    const x=xOf(i);
-    ctx.fillText(p.date?p.date.slice(5):i+1,x,H-PAD.bottom+14);
-  });
-
-  // Tooltip on hover
-  canvas._pts=pts;canvas._xOf=xOf;canvas._yOf=yOf;
-  canvas._cH=cH;canvas._PAD=PAD;canvas._vmin=vmin;canvas._vmax=vmax;
-} // end _drawChart
-
-// Hover tooltip — attach once
-(function(){
-  let tipEl=null;
-  function getTip(){
-    if(!tipEl){
-      tipEl=document.createElement('div');
-      tipEl.style.cssText='position:fixed;background:#1A2233;color:#fff;padding:6px 10px;border-radius:7px;font-size:11px;line-height:1.6;pointer-events:none;display:none;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.2)';
-      document.body.appendChild(tipEl);
-    }
-    return tipEl;
-  }
-  document.addEventListener('mousemove',e=>{
-    const canvas=document.getElementById('sv-chart');
-    if(!canvas){return;}
-    const tip=getTip();
-    const pts=canvas._pts;
-    if(!pts||!pts.length){tip.style.display='none';return;}
-    const rect=canvas.getBoundingClientRect();
-    const mx=e.clientX-rect.left;
-    if(mx<0||mx>rect.width){tip.style.display='none';return;}
-    const xOf=canvas._xOf;
-    let best=0,bd=Infinity;
-    pts.forEach((p,i)=>{const d=Math.abs(xOf(i)-mx);if(d<bd){bd=d;best=i;}});
-    if(bd>28){tip.style.display='none';return;}
-    const p=pts[best];
-    const c=p.result==='Pass'?'#4ade80':p.result==='Fail'?'#f87171':'#fbbf24';
-    tip.innerHTML=`<b style="color:${c}">${p.result||'—'}</b> | SV: <b>${p.sv}</b><br>${p.label} | ${p.date||''}`;
-    tip.style.display='block';
-    tip.style.left=(e.clientX+14)+'px';
-    tip.style.top=(e.clientY-10)+'px';
-  });
-})();
-
 // SPEC
 function renderSpecPage(){
   document.getElementById('spec-tbody').innerHTML=specs.map((s,i)=>`
@@ -897,10 +622,8 @@ async function pushSpec(){
 (function(){
   const n=nowDT();
   document.getElementById('f-date').value=n.date;
-  document.getElementById('f-time').value=n.time;
   selCheck('');buildSampPanel();addRow();
   autoConnect();
-  window.addEventListener('resize',()=>{if(document.getElementById('page-dash').classList.contains('active'))renderDash();});
 })();
 </script>
 </body>
