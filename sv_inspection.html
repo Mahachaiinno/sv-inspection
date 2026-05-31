@@ -523,7 +523,8 @@ function makeRow(id){
     <td class="spec-td" id="smx-${id}">—</td>
     <td class="res-blank" id="res-${id}">—</td>
     <td><input class="r-sink" type="number" placeholder="วิ" step="0.1" oninput="calcST(${id})" style="font-family:'IBM Plex Mono',monospace;text-align:center;background:#f0f7f0"></td>
-    <td><input class="r-st-max" type="number" placeholder="Max" step="0.1" style="font-family:'IBM Plex Mono',monospace;text-align:center;background:#e8f5e9;pointer-events:none;color:var(--text-sec)" readonly></td>
+    <td class="spec-td" id="stmx-${id}">—</td>
+    <input class="r-st-max" type="hidden">
     <td class="res-blank" id="res-st-${id}">—</td>
   </tr>`;
 }
@@ -560,11 +561,14 @@ function onDieSel(id){
   const row=document.getElementById('row-'+id);
   const die=row.querySelector('.r-die').value;
   const stSpec=getSpecST(die);
-  const stMaxIn=row.querySelector('.r-st-max');
+  const stMaxHidden=row.querySelector('.r-st-max');
+  const stMaxCell=document.getElementById('stmx-'+id);
   if(stSpec&&die){
-    stMaxIn.value=stSpec.max;
+    stMaxHidden.value=stSpec.max;
+    stMaxCell.textContent=stSpec.max;
   } else {
-    stMaxIn.value='';
+    stMaxHidden.value='';
+    stMaxCell.textContent='—';
   }
   document.getElementById('res-st-'+id).className='res-blank';
   document.getElementById('res-st-'+id).textContent='—';
