@@ -161,7 +161,8 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);fon
     </button>
     <button class="tab-btn active" onclick="showPage('form',this)"><i class="ti ti-plus"></i> บันทึก</button>
     <button class="tab-btn" onclick="showPage('records',this)"><i class="ti ti-list"></i> รายการ</button>
-    <button class="tab-btn" onclick="showPage('spec',this)"><i class="ti ti-ruler"></i> SPEC</button>
+    <button class="tab-btn" onclick="showPage('spec',this)"><i class="ti ti-ruler"></i> SPEC SV</button>
+    <button class="tab-btn" onclick="showPage('specst',this)"><i class="ti ti-clock"></i> SPEC ST</button>
   </div>
 </div>
 
@@ -224,16 +225,23 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);fon
       <table class="prod-table">
         <thead>
           <tr>
-            <th class="th-b" style="width:26px"></th>
-            <th class="th-b">LINE</th>
-            <th class="th-b">Main Formula</th>
-            <th class="th-b">Sub Formula</th>
-            <th class="th-b">Feed Code</th>
-            <th class="th-b">Die Size</th>
-            <th class="th-b">SV</th>
-            <th class="th-g">SPEC Min</th>
-            <th class="th-g">SPEC Max</th>
-            <th class="th-b">ผล</th>
+            <th class="th-b" rowspan="2" style="width:26px"></th>
+            <th class="th-b" rowspan="2">LINE</th>
+            <th class="th-b" rowspan="2">Main Formula</th>
+            <th class="th-b" rowspan="2">Sub Formula</th>
+            <th class="th-b" rowspan="2">Feed Code</th>
+            <th class="th-b" rowspan="2">Die Size</th>
+            <th class="th-b" colspan="4" style="background:#1F4E79;border-bottom:1.5px solid #BDD7EE">SV</th>
+            <th class="th-b" colspan="3" style="background:#375623;border-bottom:1.5px solid #A9C77A">Sinking Time (ST)</th>
+          </tr>
+          <tr>
+            <th class="th-b" style="font-size:10px">SV</th>
+            <th class="th-g" style="font-size:10px">SPEC Min</th>
+            <th class="th-g" style="font-size:10px">SPEC Max</th>
+            <th class="th-b" style="font-size:10px">Result SV</th>
+            <th class="th-b" style="font-size:10px;background:#2d6b40">ST (วิ)</th>
+            <th class="th-b" style="font-size:10px;background:#4a8a5e">SPEC Max</th>
+            <th class="th-b" style="font-size:10px;background:#2d6b40">Result ST</th>
           </tr>
         </thead>
         <tbody id="prod-tbody"></tbody>
@@ -264,7 +272,8 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);fon
         <thead><tr>
           <th>#</th><th>วันที่</th><th>เวลา</th><th>Inspector</th><th>Shift</th><th>Check</th>
           <th>Sampling</th><th>LINE</th><th>Main</th><th>Sub</th>
-          <th>Feed Code</th><th>Die Size</th><th>SV</th><th>SPEC</th><th>ผล</th><th></th>
+          <th>Feed Code</th><th>Die Size</th><th>SV</th><th>SPEC SV</th><th>Result SV</th>
+          <th>ST (วิ)</th><th>ST Max</th><th>Result ST</th><th></th>
         </tr></thead>
         <tbody id="rec-body"></tbody>
       </table>
@@ -311,6 +320,48 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);fon
   </div>
 </div>
 
+<!-- ═══ PAGE: SPEC ST ═══ -->
+<div id="page-specst" class="page">
+  <div class="card">
+    <div class="section-hdr"><i class="ti ti-clock"></i> กำหนด SPEC Sinking Time ตาม Die Size</div>
+    <p style="font-size:12px;color:var(--text-sec);margin-bottom:14px">
+      ค่า ST <strong>ยิ่งต่ำยิ่งดี</strong> — ระบบจะ Pass เมื่อ ST ≤ Max ที่กำหนด
+    </p>
+    <div style="overflow-x:auto">
+      <table class="spec-mgr">
+        <thead><tr>
+          <th style="width:160px">Die Size</th>
+          <th style="width:130px;text-align:center">ST Max (วิ)</th>
+          <th style="width:55px"></th>
+        </tr></thead>
+        <tbody id="specst-tbody"></tbody>
+      </table>
+    </div>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:700;color:var(--text-sec);margin-bottom:9px;text-transform:uppercase;letter-spacing:.4px">เพิ่ม Die Size ใหม่</div>
+      <div style="display:grid;grid-template-columns:1fr 110px auto;gap:8px;align-items:end">
+        <div class="field">
+          <label>Die Size</label>
+          <select id="new-st-die">
+            <option value="">-- เลือก --</option>
+            <option>1.0</option><option>1.2</option><option>1.4</option><option>1.7</option>
+            <option>2.0</option><option>2.3</option>
+            <option>Crumble(00)</option><option>Crumble(0.50)</option>
+            <option>Crumble(01)</option><option>Crumble(02)</option>
+          </select>
+        </div>
+        <div class="field"><label>ST Max (วิ)</label><input type="number" id="new-st-max" placeholder="0" step="0.1" style="font-family:'IBM Plex Mono',monospace"></div>
+        <div class="field" style="justify-content:flex-end"><label style="opacity:0">x</label>
+          <button class="btn success" onclick="addSpecST()"><i class="ti ti-plus"></i> เพิ่ม</button>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="pushSpecST()"><i class="ti ti-cloud-upload"></i> บันทึก SPEC ST → Google Sheet</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast-el"></div>
 
 <script>
@@ -332,11 +383,14 @@ const SHIFT_TIMES={
 };
 const DEFAULT_SPECS=[{main:'701',sub:'P',min:70,max:110},{main:'901',sub:'S',min:70,max:110},{main:'POLY',sub:'G',min:80,max:120},{main:'MS3618',sub:'NK',min:0,max:0},{main:'MS9123',sub:'B1',min:0,max:0},{main:'TNT',sub:'B2',min:0,max:0},{main:'BROODS',sub:'B3',min:0,max:0},{main:'97LC',sub:'',min:0,max:0},{main:'Others',sub:'',min:0,max:0}];
 
-let records=[],specs=[],selCheckVal='',selSampVal='',rowId=0;
+let records=[],specs=[],specST=[],selCheckVal='',selSampVal='',rowId=0;
 try{const s=localStorage.getItem('sv_r');if(s)records=JSON.parse(s);}catch(e){}
 try{const s=localStorage.getItem('sv_s');if(s)specs=JSON.parse(s);else specs=[...DEFAULT_SPECS];}catch(e){specs=[...DEFAULT_SPECS];}
+try{const s=localStorage.getItem('sv_st');if(s)specST=JSON.parse(s);}catch(e){}
 
-function saveLocal(){try{localStorage.setItem('sv_r',JSON.stringify(records));localStorage.setItem('sv_s',JSON.stringify(specs));}catch(e){}}
+function saveLocal(){
+  try{localStorage.setItem('sv_r',JSON.stringify(records));localStorage.setItem('sv_s',JSON.stringify(specs));localStorage.setItem('sv_st',JSON.stringify(specST));}catch(e){}
+}
 function nowDT(){const d=new Date();return{date:d.toISOString().slice(0,10),time:d.toTimeString().slice(0,5)};}
 function fget(id){return(document.getElementById(id)||{}).value||'';}
 function getSpec(main,sub){return specs.find(s=>s.main===main&&s.sub===sub)||specs.find(s=>s.main===main&&!s.sub)||specs.find(s=>s.main===main)||null;}
@@ -438,6 +492,7 @@ function showPage(p,btn){
   document.getElementById('samp-panel').classList.remove('open');
   if(p==='records')renderTable();
   if(p==='spec')renderSpecPage();
+  if(p==='specst')renderSpecSTPage();
 }
 
 // Toast
@@ -451,7 +506,7 @@ function toast(msg,type='info'){
 function mOpts(){return'<option value="">—</option>'+MAIN_FORMULAS.map(f=>`<option>${f}</option>`).join('');}
 function sOpts(){return'<option value="">None</option><option>P</option><option>S</option><option>G</option><option>NK</option><option>MY</option>';}
 function lOpts(){return'<option value="">—</option>'+LINES.map(l=>`<option>${l}</option>`).join('');}
-function dOpts(){return'<option value="">—</option><option>1.0</option><option>1.2</option><option>1.4</option><option>1.7</option><option>2.0</option><option>2.3</option><option>CRUMBLE</option>';}
+function dOpts(){return'<option value="">—</option><option>1.0</option><option>1.2</option><option>1.4</option><option>1.7</option><option>2.0</option><option>2.3</option><option>Crumble(00)</option><option>Crumble(0.50)</option><option>Crumble(01)</option><option>Crumble(02)</option>';}
 function makeRow(id){
   return`<tr id="row-${id}">
     <td style="text-align:center"><button class="del-row-btn" onclick="delRow(${id})">✕</button></td>
@@ -462,11 +517,14 @@ function makeRow(id){
     </td>
     <td><select class="r-sub" onchange="calcRes(${id})">${sOpts()}</select></td>
     <td><input class="r-feed" type="text" placeholder="Feed Code"></td>
-    <td><select class="r-die">${dOpts()}</select></td>
+    <td><select class="r-die" onchange="onDieSel(${id})">${dOpts()}</select></td>
     <td><input class="r-sv" type="number" placeholder="0.00" step="0.01" oninput="calcRes(${id})" style="font-family:'IBM Plex Mono',monospace;text-align:center"></td>
     <td class="spec-td" id="smn-${id}">—</td>
     <td class="spec-td" id="smx-${id}">—</td>
     <td class="res-blank" id="res-${id}">—</td>
+    <td><input class="r-sink" type="number" placeholder="วิ" step="0.1" oninput="calcST(${id})" style="font-family:'IBM Plex Mono',monospace;text-align:center;background:#f0f7f0"></td>
+    <td><input class="r-st-max" type="number" placeholder="Max" step="0.1" style="font-family:'IBM Plex Mono',monospace;text-align:center;background:#e8f5e9;pointer-events:none;color:var(--text-sec)" readonly></td>
+    <td class="res-blank" id="res-st-${id}">—</td>
   </tr>`;
 }
 function addRow(){rowId++;document.getElementById('prod-tbody').insertAdjacentHTML('beforeend',makeRow(rowId));}
@@ -498,6 +556,55 @@ function calcRes(id){
   if(!sp||isNaN(sv)||(!sp.min&&!sp.max)){el.className='res-blank';el.textContent='—';return;}
   const ok=sv>=sp.min&&sv<=sp.max;el.className=ok?'res-pass':'res-fail';el.textContent=ok?'Pass ✓':'Fail ✗';
 }
+function onDieSel(id){
+  const row=document.getElementById('row-'+id);
+  const die=row.querySelector('.r-die').value;
+  const stSpec=getSpecST(die);
+  const stMaxIn=row.querySelector('.r-st-max');
+  if(stSpec&&die){
+    stMaxIn.value=stSpec.max;
+  } else {
+    stMaxIn.value='';
+  }
+  document.getElementById('res-st-'+id).className='res-blank';
+  document.getElementById('res-st-'+id).textContent='—';
+}
+function getSpecST(die){return specST.find(s=>s.die===die)||null;}
+function calcST(id){
+  const row=document.getElementById('row-'+id);
+  const st=parseFloat(row.querySelector('.r-sink').value);
+  const stMax=parseFloat(row.querySelector('.r-st-max').value);
+  const el=document.getElementById('res-st-'+id);
+  if(isNaN(st)||isNaN(stMax)){el.className='res-blank';el.textContent='—';return;}
+  const ok=st<=stMax;
+  el.className=ok?'res-pass':'res-fail';el.textContent=ok?'Pass ✓':'Fail ✗';
+}
+// ─── SPEC ST page ────────────────────────────────────────────
+function renderSpecSTPage(){
+  document.getElementById('specst-tbody').innerHTML=specST.map((s,i)=>`
+    <tr>
+      <td style="font-weight:600">${s.die}</td>
+      <td style="text-align:center"><input class="sinput" type="number" value="${s.max}" step="0.1" onchange="specST[${i}].max=parseFloat(this.value)||0;saveLocal()"></td>
+      <td style="text-align:center"><button class="btn sm danger" onclick="specST.splice(${i},1);saveLocal();renderSpecSTPage()"><i class="ti ti-trash"></i></button></td>
+    </tr>`).join('');
+}
+function addSpecST(){
+  const die=fget('new-st-die');
+  if(!die){toast('กรุณาเลือก Die Size','err');return;}
+  const max=parseFloat(document.getElementById('new-st-max').value)||0;
+  const idx=specST.findIndex(s=>s.die===die);
+  if(idx>=0)specST[idx]={die,max};
+  else specST.push({die,max});
+  saveLocal();renderSpecSTPage();
+  document.getElementById('new-st-die').value='';
+  document.getElementById('new-st-max').value='';
+  toast('เพิ่ม SPEC ST แล้ว','ok');
+}
+async function pushSpecST(){
+  saveLocal();
+  try{await gsCall({action:'saveSpecST',specST});toast('บันทึก SPEC ST → Google Sheet สำเร็จ','ok');}
+  catch(e){toast('บันทึก SPEC ST ล้มเหลว: '+e.message,'err');}
+}
 function getRows(){
   return Array.from(document.getElementById('prod-tbody').rows).map(row=>{
     const mainSel=row.querySelector('.r-main').value;
@@ -507,7 +614,15 @@ function getRows(){
     const sv=row.querySelector('.r-sv').value,svN=parseFloat(sv);
     const sp=getSpec(mainSel,sub);let result='';
     if(sp&&!isNaN(svN)&&(sp.min||sp.max))result=svN>=sp.min&&svN<=sp.max?'Pass':'Fail';
-    return{line:row.querySelector('.r-line').value,main,sub,feedcode:row.querySelector('.r-feed').value,diesize:row.querySelector('.r-die').value,sv,specMin:sp?sp.min:'',specMax:sp?sp.max:'',result};
+    const sink=row.querySelector('.r-sink').value;
+    const stMax=row.querySelector('.r-st-max').value;
+    const stN=parseFloat(sink),stMxN=parseFloat(stMax);
+    let resultST='';
+    if(!isNaN(stN)&&!isNaN(stMxN))resultST=stN<=stMxN?'Pass':'Fail';
+    return{line:row.querySelector('.r-line').value,main,sub,
+      feedcode:row.querySelector('.r-feed').value,diesize:row.querySelector('.r-die').value,
+      sv,specMin:sp?sp.min:'',specMax:sp?sp.max:'',result,
+      sinktime:sink,stSpecMax:stMax,resultST};
   }).filter(r=>r.line||r.main||r.sv);
 }
 function clearProd(){document.getElementById('prod-tbody').innerHTML='';rowId=0;addRow();}
@@ -569,11 +684,14 @@ function renderTable(){
       <td style="font-family:'IBM Plex Mono',monospace;font-size:11px">${row.feedcode||'—'}</td>
       <td style="font-size:11px">${row.diesize||'—'}</td>
       <td style="font-family:'IBM Plex Mono',monospace;font-weight:700">${row.sv||'—'}</td>
-      <td style="font-family:'IBM Plex Mono',monospace;font-size:11px">${spec}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:11px">${(row.specMin||row.specMax)?row.specMin+'–'+row.specMax:'—'}</td>
       <td>${bHtml(row.result)}</td>
+      <td style="font-family:'IBM Plex Mono',monospace">${row.sinktime||'—'}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:11px">${row.stSpecMax||'—'}</td>
+      <td>${bHtml(row.resultST)}</td>
       <td>${isNew?`<button class="btn sm danger" onclick="delRec(${rec.id})"><i class="ti ti-trash"></i></button>`:''}</td>
     </tr>`;
-    if(i<flat.length-1&&flat[i+1].rec.id!==rec.id)html+=`<tr><td colspan="16" style="padding:0;height:3px;background:var(--bg)"></td></tr>`;
+    if(i<flat.length-1&&flat[i+1].rec.id!==rec.id)html+=`<tr><td colspan="19" style="padding:0;height:3px;background:var(--bg)"></td></tr>`;
     prevId=rec.id;
   });
   tbody.innerHTML=html;
